@@ -33,6 +33,7 @@ class bot(commands.Bot):
         super().__init__(intents = intents,command_prefix="%µ¨£%£µ%",help_command=None)
         
     async def setup_hook(self):
+        await self.add_cog(account(self),guild=guild)
 
         await self.tree.sync(guild=guild)
         await self.tree.sync()
