@@ -1,12 +1,13 @@
 import requests
 import json
-from discord.ext import commands,app_commands
+from discord.ext import commands
+from discord import app_commands
 import discord
 import datetime
 
-from login import login
-from checks import check
-from fonction import date
+from .login import login
+from .checks import check
+from .fonction import date
 
 
 
@@ -15,16 +16,20 @@ class emploi_du_temps(commands.Cog):
         self.bot = bot
 
     @check.has_account()
-    @app_commands.command(name="emploi_du_temps",description="")
-    async def emploi_du_temps(self,interaction:discord.Interaction,jour:str=date().day,mois:str=date().month):
+    @app_commands.command(name="emploi_du_temps",description="pas encore")
+    async def emploi_du_temps(self,interaction:discord.Interaction,jour:str="None",mois:str="None"):
+        if jour=="None":
+            jour =date().day
+        if mois=="None":
+            mois =date().month
         await interaction.response.defer(ephemeral=False)
-        info=login()
+        info=login(str(interaction.user.id))
         token=info["token"]
 
-        url = f"https://api.ecoledirecte.com/v3/Eleves/{info['data']['accounts'][0]['id']}/cahierdetexte.awp?verbe=get"
+        url = f"https://api.ecoledirecte.com/v3/E/{info['data']['accounts'][0]['id']}/emploidutemps.awp?verbe=get"
 
         querystring = {"v":"4.37.1"}
-        dates={date().year}-{date().month}-{date().day}
+        dates=f"{date().year}-{date(int(mois)).month}-{date(int(jour)).day}"
         payload = {'data':json.dumps({
             "dateDebut": dates,
             "dateFin": dates,
@@ -32,7 +37,6 @@ class emploi_du_temps(commands.Cog):
         })}
         headers = {
             "content-type": "application/x-www-form-urlencoded",
-            "content-lenght":"7",
             "authority": "api.ecoledirecte.com",
             "accept": "application/json, text/plain, */*",
             "accept-language": "fr-FR,fr;q=0.5",
@@ -51,6 +55,14 @@ class emploi_du_temps(commands.Cog):
 
         response = requests.post(url, data=payload, headers=headers, params=querystring)
         data=response.json()
-        embed=discord.Embed(title=f"Emploi du temps du {dates}")
+        cours=data["data"]
+        new_cours=[False]*24
+        for i in range(len(cours)):
+            new_cours[int(cours[i]["start_date"][11:-3])]=cours[i]
+        embeds=[discord.Embed(title=f"Emploi du temps du {dates}")]
+        for cour in new_cours:
+            if cour:
+                embeds.append(discord.Embed(title=f"__**{cour['text']}**__",description=f"> Professeur : {cour['prof']}\n\n> Salle : {cour['salle']}\n\n> Heures : {cour['start_date'][11:]} - {cour['end_date'][11:]}",color=discord.Color.from_str(cour["color"])))
+        await interaction.edit_original_response(embeds=embeds)
         
         

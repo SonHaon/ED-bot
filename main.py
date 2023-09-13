@@ -18,7 +18,7 @@ from discord.app_commands import Translator, locale_str, TranslationContext, Tra
 from Cogs_sommaire import *
 load_dotenv(".env")
 TOKEN = os.getenv("TOKEN")
-guild = discord.Object(id="mettre id")
+guild = discord.Object(id="1022844623372165260")
 
 logger = logging.getLogger('discord.artichauds')
 logger.setLevel(logging.INFO)
@@ -34,6 +34,7 @@ class bot(commands.Bot):
         
     async def setup_hook(self):
         await self.add_cog(account(self),guild=guild)
+        await self.add_cog(emploi_du_temps(self),guild=guild)
 
         await self.tree.sync(guild=guild)
         await self.tree.sync()

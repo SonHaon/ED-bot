@@ -1,20 +1,21 @@
 import requests
 import json
 
-def login(id) -> dict:
+def login(id:str) -> dict:
 
-    with open("user_mdp.json","r") as file:
+    with open("Cogs/ecole_direct/user_mdp.json","r") as file:
         data=json.load(file)
 
     url = "https://api.ecoledirecte.com/v3/login.awp"
 
     querystring = {"v":"4.37.1"}
 
-    payload = {
+    payload = {"data":json.dumps({
         "identifiant": data[id]["username"],
         "motdepasse": data[id]["mdp"],
         "isReLogin": False,
         "uuid": ""
+        })
     }
 
     headers = {
@@ -35,5 +36,4 @@ def login(id) -> dict:
     }
 
     response = requests.post(url, data=payload, headers=headers, params=querystring)
-
     return response.json()

@@ -1,15 +1,15 @@
 import datetime
 
-def date():
+def date(day=datetime.date.today().day,month=datetime.date.today().month):
     today=datetime.date.today()
+    
     class date:
-        day=today.day
-        month=today.month
         year=today.year
-
-        if day < 10:
-            day="0"+str(day)
-        if month < 10:
-            month="0"+str(month)
+    date.day=day
+    date.month=month
+    if date.day < 10:
+        date.day="0"+str(day)
+    if date.month < 10:
+        date.month="0"+str(month)
     
     return date
